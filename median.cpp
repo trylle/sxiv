@@ -45,13 +45,13 @@ int get_median_color()
 			d+=delta*delta;
 		}
 
-		return sqrt(d);
+		return std::max<double>(sqrt(d), 1);
 	};
 
 	for (int i=0; i<32; ++i)
 	{
 		double sum_inv_dist=0;
-		pixel y_n;
+		pixel y_n = { 0, 0, 0 };
 
 		auto sum_inv_dist_func=[&] (pixel x)
 		{
@@ -63,27 +63,27 @@ int get_median_color()
 			double w=1/dist(x, y);
 
 			for (int i=0; i<3; ++i)
-			{
 				y_n[i]+=x[i]*w;
-			}
 		};
 
 		for_each_pixel(sum_inv_dist_func);
 		for_each_pixel(weighted_sample_func);
+
+		//std::cout << y_n[0] << ", " << y_n[1] << ", "<< y_n[2] << std::endl;
 
 		for (int i=0; i<3; ++i)
 		{
 			y_n[i]/=sum_inv_dist;
 		}
 
-		std::cout << sum_inv_dist << std::endl;
+		//std::cout << sum_inv_dist << std::endl;
 
 		y=y_n;
 
-		std::cout << y[0] << ", " << y[1] << ", "<< y[2] << std::endl;
+		//std::cout << y[0] << ", " << y[1] << ", "<< y[2] << std::endl;
 	}
 
-	DATA32 best_col;
+	DATA32 best_col=0;
 	unsigned char *best_colc=(unsigned char *)&best_col;
 
 	best_colc[0]=y[2];

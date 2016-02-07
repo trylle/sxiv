@@ -34,7 +34,7 @@ $(OBJ): Makefile
 	$(CC) $(CFLAGS) $(CPPFLAGS) -DVERSION=\"$(VERSION)\" -MMD -MP -c -o $@ $<
 
 median.o: median.cpp
-	$(CC) --std=c++1y $(CPPFLAGS) -DVERSION=\"$(VERSION)\" -MMD -MP -c -o $@ $<
+	$(CC) -O2 --std=c++1y $(CPPFLAGS) -DVERSION=\"$(VERSION)\" -MMD -MP -c -o $@ $<
 
 config.h:
 	cp config.def.h $@
