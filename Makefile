@@ -7,7 +7,7 @@ CC        ?= gcc
 CFLAGS    += -std=c99 -Wall -pedantic
 CPPFLAGS  += -I$(PREFIX)/include -D_XOPEN_SOURCE=700
 LDFLAGS   += -L$(PREFIX)/lib
-LIBS      := -lX11 -lImlib2
+LIBS      := -lX11 -lImlib2 -lm
 
 # optional dependencies:
 # giflib: gif animations
@@ -33,11 +33,14 @@ $(OBJ): Makefile
 %.o: %.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -DVERSION=\"$(VERSION)\" -MMD -MP -c -o $@ $<
 
+median.o: median.cpp
+	$(CC) --std=c++1y $(CPPFLAGS) -DVERSION=\"$(VERSION)\" -MMD -MP -c -o $@ $<
+
 config.h:
 	cp config.def.h $@
 
-sxiv:	$(OBJ)
-	$(CC) $(LDFLAGS) -o $@ $(OBJ) $(LIBS)
+sxiv:	$(OBJ) median.o
+	$(CC) $(LDFLAGS) -o $@ $(OBJ) median.o $(LIBS)
 
 clean:
 	rm -f $(OBJ) $(DEP) sxiv

@@ -38,6 +38,7 @@
 #include "thumbs.h"
 #include "util.h"
 #include "window.h"
+#include "median.h"
 
 #define _MAPPINGS_CONFIG
 #include "config.h"
@@ -311,6 +312,11 @@ void load_image(int new)
 	}
 	files[new].flags &= ~FF_WARN;
 	fileidx = current = new;
+
+	int col=get_median_color();
+
+	win.fscol=col;
+	win.bgcol=col;
 
 	info.open = false;
 	open_info();
