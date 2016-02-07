@@ -21,6 +21,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <math.h>
 
 #include "image.h"
 #include "options.h"
@@ -398,6 +399,8 @@ bool img_fit(img_t *img)
 			z = MIN(zw, zh);
 			break;
 	}
+
+	z = floor(z);
 
 	z = MAX(z, zoom_min);
 	z = MIN(z, zmax);
