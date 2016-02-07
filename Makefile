@@ -40,7 +40,7 @@ config.h:
 	cp config.def.h $@
 
 sxiv:	$(OBJ) median.o
-	$(CC) $(LDFLAGS) -o $@ $(OBJ) median.o $(LIBS)
+	g++ $(LDFLAGS) -o $@ $(OBJ) median.o $(LIBS)
 
 clean:
 	rm -f $(OBJ) $(DEP) sxiv
