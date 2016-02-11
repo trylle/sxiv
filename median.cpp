@@ -20,17 +20,17 @@ void for_each_pixel(func_type ft)
 	{
 		for (int x = 0; x<dw; ++x)
 		{
-			unsigned char *pix = (unsigned char *)&ptr[y*dw+x];
-			double db = pix[0];
-			double dg = pix[1];
-			double dr = pix[2];
+			DATA32 pix = ptr[y*dw+x];
+			double dr = (pix & 0xff0000) >> 16;
+			double dg = (pix & 0xff00) >> 8;
+			double db = pix & 0xff;
 
 			ft({ dr, dg, db });
 		}
 	}
 }
 
-int get_median_color()
+DATA32 get_median_color()
 {
 	pixel y={128, 128, 128};
 
@@ -45,22 +45,29 @@ int get_median_color()
 			d+=delta*delta;
 		}
 
-		return std::max<double>(sqrt(d), 1);
+		return sqrt(d);
 	};
 
-	for (int i=0; i<32; ++i)
+	auto dist_limited=[=] (pixel left, pixel right)
+	{
+		return std::max<double>(dist(left, right), 1e-1);
+	};
+
+	const int iterations=32;
+
+	for (int i=0; i<iterations; ++i)
 	{
 		double sum_inv_dist=0;
-		pixel y_n = { 0, 0, 0 };
+		pixel y_n={ 0, 0, 0 };
 
 		auto sum_inv_dist_func=[&] (pixel x)
 		{
-			sum_inv_dist+=1/dist(x, y);
+			sum_inv_dist+=1/dist_limited(x, y);
 		};
 
 		auto weighted_sample_func=[&] (pixel x)
 		{
-			double w=1/dist(x, y);
+			double w=1/dist_limited(x, y);
 
 			for (int i=0; i<3; ++i)
 				y_n[i]+=x[i]*w;
@@ -69,26 +76,34 @@ int get_median_color()
 		for_each_pixel(sum_inv_dist_func);
 		for_each_pixel(weighted_sample_func);
 
-		//std::cout << y_n[0] << ", " << y_n[1] << ", "<< y_n[2] << std::endl;
-
 		for (int i=0; i<3; ++i)
-		{
 			y_n[i]/=sum_inv_dist;
-		}
-
-		//std::cout << sum_inv_dist << std::endl;
 
 		y=y_n;
-
-		//std::cout << y[0] << ", " << y[1] << ", "<< y[2] << std::endl;
 	}
 
-	DATA32 best_col=0;
-	unsigned char *best_colc=(unsigned char *)&best_col;
+	// since we only have an estimate, pick the closest actually used color to the estimate
+	auto best_dist=std::numeric_limits<double>::max();
+	auto best_cold=y;
+	auto closest=[&] (pixel x)
+	{
+		auto d=dist(x, y);
 
-	best_colc[0]=y[2];
-	best_colc[1]=y[1];
-	best_colc[2]=y[0];
+		if (d<best_dist)
+		{
+			best_dist=d;
+			best_cold=x;
+		}
+	};
+
+	for_each_pixel(closest);
+
+	y=best_cold;
+
+	DATA32 best_col=0;
+
+	best_col=(std::uint8_t(y[0]) << 16)+(std::uint8_t(y[1]) << 8)+std::uint8_t(y[2]);
 
 	return best_col;
 }
+
