@@ -400,7 +400,18 @@ bool img_fit(img_t *img)
 			break;
 	}
 
-	z = floor(z);
+	if (z>0)
+	{
+		if (z<1)
+		{
+			float zz=1/z;
+
+			zz=ceil(zz);
+			z=1/zz;
+		}
+		else
+			z = floor(z);
+	}
 
 	z = MAX(z, zoom_min);
 	z = MIN(z, zmax);
